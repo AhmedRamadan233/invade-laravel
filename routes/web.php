@@ -18,5 +18,8 @@ Route::prefix('tasks')->middleware('auth')->group(function () {
     Route::post('/toggle-status/{id}', [TaskController::class, 'toggleStatus'])->name('tasks.toggleStatus');
     Route::get('/edit/{id}', [TaskController::class, 'editTask'])->name('tasks.edit');
     Route::put('update', [TaskController::class, 'update'])->name('tasks.update');
-    Route::delete('destroy/{id}', [TaskController::class, 'destroy'])->name('tasks.destroy');
+    Route::delete('/destroy/{id}', [TaskController::class, 'destroy'])->name('tasks.destroy');
+    Route::get('/trashed', [TaskController::class, 'getTasksTrashing'])->name('tasks.trashed');
+    Route::post('/restore/{id}', [TaskController::class, 'getTasksRestoring'])->name('tasks.restore');
+    Route::delete('/force-delete/{id}', [TaskController::class, 'deleteTasksForced'])->name('tasks.forceDelete');
 });

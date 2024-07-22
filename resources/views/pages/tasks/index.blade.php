@@ -3,23 +3,24 @@
 
 
 @section('content')
-    <div class="container-fluid p-5 " id="tasks-table">
+    <div class="container-fluid p-5 ">
         <div class="row">
             <div class="col-lg-12">
                 <div class="card card-primary card-outline shadow">
                     <div class="card-header">
 
                         <div class="d-flex justify-content-between align-items-center flex-wrap">
-                            <form action="{{ route('tasks.index') }}" method="GET"
-                                class="d-flex flex-wrap align-items-center">
+                            <form id="search-form" class="d-flex flex-wrap align-items-center">
                                 <div class="form-group me-2 mb-2">
                                     <label for="title" class="visually-hidden">Search by title</label>
                                     <input type="text" class="form-control" id="title"
                                         placeholder="Search by title..." name="title" value="{{ request('title') }}">
                                 </div>
-
-                                <button type="submit" class="btn btn-primary mb-2">Search</button>
                             </form>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="window.location.href='{{ route('tasks.trashed') }}'">
+                                View Trashed Tasks
+                            </button>
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                 data-bs-target="#createTaskModal">
                                 Add new Task
@@ -29,24 +30,25 @@
                     </div>
 
                     <div class="card-body">
-                        <table class="table table-bordered table-striped">
+
+                        <table id="tasks-table" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
+                                    <th class="text-center">ID</th>
+                                    <th class="text-center">Name</th>
+                                    <th class="text-center">Description</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($tasks as $task)
                                     <tr>
 
-                                        <td>{{ $task->id }}</td>
-                                        <td>{{ $task->title }}</td>
-                                        <td>{{ $task->description }}</td>
-                                        <td>
+                                        <td class="text-center">{{ $task->id }}</td>
+                                        <td class="text-center">{{ $task->title }}</td>
+                                        <td class="text-center">{{ $task->description }}</td>
+                                        <td class="text-center">
                                             <button
                                                 class="btn {{ $task->status === 'pending' ? 'btn-success' : 'btn-secondary' }} toggle-status"
                                                 data-id="{{ $task->id }}">
@@ -54,8 +56,7 @@
                                             </button>
                                         </td>
 
-                                        <td>
-
+                                        <td class="text-center">
                                             <button onclick="editTask({{ $task->id }})" type="button"
                                                 class="btn btn-primary m-1" data-bs-toggle="modal"
                                                 data-bs-target="#editTaskModal">
@@ -71,7 +72,7 @@
                             </tbody>
                         </table>
                         <div class="d-flex justify-content-center">
-                            {{ $tasks->links() }}
+                            {{ $tasks->withQueryString()->appends(['search' => 1])->links() }}
                         </div>
 
                     </div>
@@ -223,7 +224,7 @@
         });
         // delete 
         function deleteTask(taskId, taskName) {
-   
+
 
             if (confirm("Are you sure you want to delete the task: " + taskName + "?")) {
                 $.ajax({
@@ -238,6 +239,50 @@
                     },
                     error: function(xhr, status, error) {
                         console.error("Error deleting task:", error);
+                    }
+                });
+            }
+        }
+
+
+
+        function restoreTask(taskId) {
+            if (confirm('Are you sure you want to restore this task?')) {
+                $.ajax({
+                    url: '{{ route('tasks.restore', ':id') }}'.replace(':id', taskId),
+                    type: 'POST',
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        alert(response.data);
+                        // Optionally reload the table or remove the row
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        alert('An error occurred while restoring the task.');
+                    }
+                });
+            }
+        }
+
+        function forceDeleteTask(taskId) {
+            if (confirm('Are you sure you want to force delete this task? This action cannot be undone.')) {
+                $.ajax({
+                    url: '{{ route('tasks.forceDelete', ':id') }}'.replace(':id', taskId),
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        alert(response.data);
+                        // Optionally reload the table or remove the row
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        alert('An error occurred while force deleting the task.');
                     }
                 });
             }

@@ -9,9 +9,10 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tasks = Task::paginate(5);
+        $filters = $request->query();
+        $tasks = Task::filter($filters)->paginate(5);
         return view('pages.tasks.index', compact('tasks'));
     }
     public function store(StoreTaskRequest $request)
@@ -71,13 +72,44 @@ class TaskController extends Controller
     public function destroy(Request $request, $id)
     {
         $task = Task::findOrFail($id);
-
         $task->delete();
 
-        if ($task) {
-            return response()->json(['success' => true, 'message' => 'Task and image deleted successfully']);
-        } else {
-            return response()->json(['success' => true, 'message' => 'Task deleted successfully, but image not found or already deleted']);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Task deleted successfully and moved to trash',
+        ]);
+    }
+
+    public function getTasksTrashing(Request $request)
+    {
+      
+        $filters = $request->query();
+        $tasks = Task::onlyTrashed()->filter($filters)->paginate(5);
+        return view('pages.tasks.trash', compact('tasks'));
+
+    }
+
+    public function getTasksRestoring(Request $request, $id)
+    {
+        $task = Task::onlyTrashed()->findOrFail($id);
+        $task->restore();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Restored task with ID: ' . $id,
+            'name' => $task->title,
+        ]);
+    }
+
+    public function deleteTasksForced($id)
+    {
+        $task = Task::withTrashed()->findOrFail($id);
+        $task->forceDelete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Force deleted task with ID: ' . $id,
+            'name' => $task->title,
+        ]);
     }
 }

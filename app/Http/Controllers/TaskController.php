@@ -13,7 +13,12 @@ class TaskController extends Controller
     {
         $filters = $request->query();
         $tasks = Task::filter($filters)->paginate(5);
-        return view('pages.tasks.index', compact('tasks'));
+
+        if ($request->wantsJson() || $request->query('api') == 'true') {
+            return response()->json(['data' => $tasks], 200);
+        } else {
+            return view('pages.tasks.index', compact('tasks'));
+        }
     }
     public function store(StoreTaskRequest $request)
     {
@@ -82,11 +87,14 @@ class TaskController extends Controller
 
     public function getTasksTrashing(Request $request)
     {
-      
         $filters = $request->query();
         $tasks = Task::onlyTrashed()->filter($filters)->paginate(5);
-        return view('pages.tasks.trash', compact('tasks'));
 
+        if ($request->wantsJson() || $request->query('api') == 'true') {
+            return response()->json(['data' => $tasks], 200);
+        } else {
+            return view('pages.tasks.trash', compact('tasks'));
+        }
     }
 
     public function getTasksRestoring(Request $request, $id)

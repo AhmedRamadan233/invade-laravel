@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Tasks\StoreTaskRequest;
 use App\Http\Requests\Tasks\UpdateTaskRequest;
+use App\Models\Category;
 use App\Models\Task;
 use Illuminate\Http\Request;
 
@@ -12,24 +13,19 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $filters = $request->query();
-        $tasks = Task::filter($filters)->paginate(5);
+        $tasks = Task::with('categories')->filter($filters)->paginate(5);
+        $categories = Category::with('tasks')->get();
 
+        // dd($tasks);
         if ($request->wantsJson() || $request->query('api') == 'true') {
             return response()->json(['data' => $tasks], 200);
         } else {
-            return view('pages.tasks.index', compact('tasks'));
+            return view('pages.tasks.index', compact('tasks', 'categories'));
         }
     }
     public function store(StoreTaskRequest $request)
     {
         $validatedData = $request->validated();
-        $defaultValues = [
-            'title' => '',
-            'description' => '',
-            'status' => 'pending',
-        ];
-
-        $validatedData = array_merge($defaultValues, $validatedData);
 
         $task = Task::create([
             'title' => $validatedData['title'],
@@ -37,11 +33,9 @@ class TaskController extends Controller
             'status' => $validatedData['status'],
         ]);
 
-        if ($task) {
-            return response()->json(['success' => true, 'message' => 'task created successfully.'], 201);
-        }
+        $task->categories()->sync($validatedData['categories']);
 
-        return response()->json(['success' => false, 'message' => 'task creation failed.'], 500);
+        return response()->json(['success' => true, 'message' => 'Task created successfully.', 'data' => $task], 201);
     }
     public function toggleStatus(Request $request, $id)
     {
@@ -71,9 +65,10 @@ class TaskController extends Controller
             'status' => $validatedData['status'],
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Task updated successfully.'], 200);
-    }
+        $task->categories()->sync($validatedData['categories']);
 
+        return response()->json(['success' => true, 'message' => 'Task updated successfully.', 'data' => $task], 200);
+    }
     public function destroy(Request $request, $id)
     {
         $task = Task::findOrFail($id);

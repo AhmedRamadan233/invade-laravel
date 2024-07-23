@@ -12,8 +12,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-
-                {{-- Start title --}}
                 <div class="row">
                     <div class="col mb-3">
                         <label for="title" class="form-label">Title</label>
@@ -24,9 +22,6 @@
                         @enderror
                     </div>
                 </div>
-                {{-- End title --}}
-
-                {{-- Start name --}}
                 <div class="row">
                     <div class="col mb-3">
                         <label for="description" class="form-label">Descriptions</label>
@@ -38,10 +33,6 @@
                         @enderror
                     </div>
                 </div>
-                {{-- End name --}}
-
-
-                {{-- Start status --}}
                 <div class="row">
                     <div class="col mb-3">
                         <label for="status" class="form-label">Status</label>
@@ -55,7 +46,20 @@
                         @enderror
                     </div>
                 </div>
-                {{-- End status --}}
+                <div class="row">
+                    <div class="col mb-3">
+                        <label for="categories" class="form-label">Categories</label>
+                        <select id="categories" name="categories[]"
+                            class="form-control @error('categories') is-invalid @enderror" multiple>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('categories')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
@@ -63,5 +67,5 @@
             </div>
         </form>
 
-    </div>z
+    </div>
 </div>

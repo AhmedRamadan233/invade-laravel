@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Tasks;
+namespace App\Http\Requests\categories;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreTaskRequest extends FormRequest
+class UpdateCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,12 +21,10 @@ class StoreTaskRequest extends FormRequest
      */
     public function rules(): array
     {
+        $categoryId = $this->input('id');
         return [
-            'title' => 'required|string|max:255|unique:tasks,title',
-            'description' => 'required|string|max:255',
-            'status' => 'required|in:pending,completed',
-            'categories' => 'required|array',
-            'categories.*' => 'exists:categories,id',
+            'name' => 'required|string|max:255|unique:categories,name,' . $categoryId,
+            
         ];
     }
 }

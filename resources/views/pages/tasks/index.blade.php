@@ -38,6 +38,7 @@
                                     <th class="text-center">Name</th>
                                     <th class="text-center">Description</th>
                                     <th class="text-center">Status</th>
+                                    <th class="text-center">Categories</th>
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>
@@ -48,6 +49,8 @@
                                         <td class="text-center">{{ $task->id }}</td>
                                         <td class="text-center">{{ $task->title }}</td>
                                         <td class="text-center">{{ $task->description }}</td>
+                                        
+
                                         <td class="text-center">
                                             <button
                                                 class="btn {{ $task->status === 'pending' ? 'btn-success' : 'btn-secondary' }} toggle-status"
@@ -55,7 +58,13 @@
                                                 {{ $task->status === 'pending' ? 'pending' : 'completed' }}
                                             </button>
                                         </td>
-
+                                        <td class="text-center">
+                                            <ul>
+                                                @foreach ($task->categories as $category)
+                                                    <li>{{ $category->name }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </td>
                                         <td class="text-center">
                                             <button onclick="editTask({{ $task->id }})" type="button"
                                                 class="btn btn-primary m-1" data-bs-toggle="modal"
@@ -153,7 +162,6 @@
                             button.removeClass('btn-success').addClass('btn-secondary').text(
                                 'completed');
                         }
-                        $('#tasks-table').DataTable().ajax.reload(null, false);
 
 
                     },
@@ -177,12 +185,18 @@
                     $('.description').val(response.editTask.description);
                     $('.status').val(response.editTask.status);
 
+                    // Populate categories
+                    var selectedCategories = response.editTask.categories.map(function(category) {
+                        return category.id;
+                    });
+                    $('#categories').val(selectedCategories).trigger('change');
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
                 }
             });
         }
+
         $(document).ready(function() {
             $('#edit-task-Form').on('submit', function(e) {
                 e.preventDefault();

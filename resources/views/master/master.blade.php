@@ -27,6 +27,10 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('tasks.index') }}">Tasks</a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('categories.index') }}">Categories</a>
+                    </li>
                 </ul>
 
             </div>
@@ -58,7 +62,7 @@
         integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
     </script>
 
-<script src="{{asset('jquery.js')}}"></script>
+    <script src="{{ asset('jquery.js') }}"></script>
 
     @stack('AjaxScripts')
 </body>

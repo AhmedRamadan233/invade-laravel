@@ -26,6 +26,8 @@ class UpdateTaskRequest extends FormRequest
             'title' => 'required|string|max:255|unique:tasks,title,' . $taskId,
             'description' => 'required|string|max:255',
             'status' => 'required|in:pending,completed',
+            'categories' => 'required|array',
+            'categories.*' => 'exists:categories,id',
         ];
     }
 }

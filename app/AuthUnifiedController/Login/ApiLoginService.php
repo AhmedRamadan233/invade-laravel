@@ -5,7 +5,6 @@ namespace App\AuthUnifiedController\Login;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class ApiLoginService
@@ -30,7 +29,7 @@ class ApiLoginService
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        $request->user()->currentAccessToken()->delete();
         return response()->json([
             'message' => 'Logout successful'
         ], 200);

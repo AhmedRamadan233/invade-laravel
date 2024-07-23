@@ -34,6 +34,14 @@
                 </ul>
 
             </div>
+            <form class="nav-link" action="{{ route('logout') }}" style="display:inline" method="post">
+                @csrf
+                <button type="submit" class="btn btn-danger ">
+                    <p>
+                        Logout
+                    </p>
+                </button>
+            </form>
         </div>
     </nav>
 

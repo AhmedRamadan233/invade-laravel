@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\AuthUnifiedController\Login\ApiLoginService;
+use App\AuthUnifiedController\Login\BladeLoginService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
@@ -11,23 +13,24 @@ use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
+    protected $bladeLoginService;
+    protected $apiLoginService;
+    public function __construct(BladeLoginService $bladeLoginService, ApiLoginService $apiLoginService)
+    {
+        $this->bladeLoginService = $bladeLoginService;
+        $this->apiLoginService = $apiLoginService;
+    }
     public function index()
     {
         return view('Auth.login');
     }
     public function login(LoginRequest $request)
     {
-        $validatedData = $request->validated();
+        if ($request->is('api/*')) {
 
-        $user = User::where('email', $validatedData['email'])->first();
-
-        if ($user && Hash::check($validatedData['password'], $user->password)) {
-
-            Auth::login($user);
-
-            return redirect()->route('tasks.index');
+            return $this->apiLoginService->login($request);
         } else {
-            return redirect()->back()->withErrors(['login' => 'Invalid credentials.']);
+            return $this->bladeLoginService->login($request);
         }
     }
 
@@ -35,7 +38,10 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        return redirect()->route('login');
+        if ($request->is('api/*')) {
+            return $this->apiLoginService->logout($request);
+        } else {
+            return $this->bladeLoginService->logout($request);
+        }
     }
 }
